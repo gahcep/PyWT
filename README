@@ -1,0 +1,56 @@
+PyWT is a Python Waitable Timer implementation. Inspired on MS mechanism (with
+the same name) but with a much greater functionality.
+PyWT is a class which inherits threading.Thread. That's why it's an async timer.
+
+The main goal of the class is to give a way of lauching any function with any number
+of arguments in a highly flexible and predetermined manner. It means the class instance 
+can be stopped, resumed, activated, deactivated at any time. Besides, all inner 
+variables which has a setter function can be easily updated during execution.
+
+Timer mechanisms are based on Message Queue and State Conditions. State Condition is a
+state in which timer is now. In different states there are a different logic. For example,
+base timer state is RUNNING. In SUSPENDED state, as it means, the timer is paused and 
+waiting for other function invocation.
+
+Main features:
+
+- Several timer types: One-Time-Shot timer (timer function invokes only once), 
+N-Repeatable timer (you can set a count variable, and a function will invokes <count> times)
+and canonical Interrupted Timer (function invokes while the timer is active)
+
+- Delayed timer start: you can start timer in non active state (IDLE state), and 
+after some actions are performed, turn it on using activate function.
+
+- Initial timer interval: inner variable, which allow you to define a delay for the first 
+function invocation
+
+- Pause/Resume feature: timer is stoppable. Also you can define a stop delay
+
+- Precision feature: inner variable which defines timer 'resolution'. The less the value, 
+the more accurate the timer is
+
+- Runtime parameters changing: you can change almost all variables during timer execution
+
+- Debugging support: by defining a DEBUG and PROFILE flags you can get a detail output
+with a time mark feature
+
+Examples
+
+Assume, we have a simple function we want to repeatedly call, namely TimerFunction.
+
+## Creating a One-Time-Shot timer (Second parameter is 0)
+wtimer = WaitableTimer(5.0, 0, TimerFunction, StartCondition=TIMER_NO_ACTIVATE)
+wtimer.start()
+# ...
+# Some code here
+# ...
+wtimer.Activate()
+
+
+## Creating a canonical timer (the first invocation is in 5 second, others are in 1 second)
+wtimer = WaitableTimer(5.0, 1.0, TimerFunction)
+wtimer.start()
+
+## Creating a repeatable timer (invoke the function only 4 times)
+wtimer = WaitableTimer(2.0, 2.0, TimerFunction, TimerCount=4, StartCondition=TIMER_ACTIVATE)
+wtimer.start()
