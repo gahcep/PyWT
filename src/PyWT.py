@@ -76,8 +76,6 @@ T_SUCCESS                   = 1000
 T_ERROR_INCORRECT_STATE     = 1001
 T_ERROR_ALREADY_SWITCHED    = 1002
 
-## Experimental #####################
-
 ## Function result conditions
 T_IS_FUNC_RESULT_TRUE       = 1
 T_IS_FUNC_RESULT_FALSE      = 2
@@ -291,9 +289,7 @@ class WaitableTimer(Thread):
                 if (time() - InitialTime) >= TimeoutMark:
                     self.__DebugPrint("Invoking a FUNCTION")
                     self.__State = TIMER_STATE_RUNNING
-                    # Behaviour logic
-                    FResult = self.__FunctionProc(*self.__FunctionArgs, **self.__FunctionKWArgs)
-                    #if self.__FunctionResult = True
+                    self.__FunctionProc(*self.__FunctionArgs, **self.__FunctionKWArgs)
                     TimeoutMark = self.__TimerInterval
                     InitialTime = time()
                     if self.__IsOneTimeShotTimer:
@@ -435,22 +431,6 @@ class WaitableTimer(Thread):
             self.__Error = T_ERROR_INCORRECT_STATE
             return False
     
-    ## EXPERIMENTAL ##########################
-    def SetTimerFuncBehaviour(self, FunctionResult, FunctionAction, 
-                              FunctionType = None, FunctionValue = None):
-        self.__DebugPrint("SetTimerFuncBehaviour(): In function")
-        
-        # There is no any DisableStateCheck flag, so it has to be a right state - INIT
-        if self.__State != TIMER_STATE_INIT:
-            self.__DebugPrint("SetTimerFuncBehaviour(): " + self.__OutputErrorState([TIMER_STATE_INIT], Invert=True))
-            self.__Error = T_ERROR_INCORRECT_STATE
-            return False
-        else:
-            self.__FunctionResult = FunctionResult
-            self.__FunctionAction = FunctionAction
-            self.__FunctionType = FunctionType
-            self.__FunctionValue = FunctionValue
-    
     ########## Action functions ##############
     def Activate(self, DisableStateCheck = False):
         self.__DebugPrint("Activate(): In function")
@@ -501,7 +481,6 @@ class WaitableTimer(Thread):
             return False
     
     def Resume(self, DisableStateCheck = False):
-        
         self.__DebugPrint("Resume(): In function")
         
         if DisableStateCheck:
@@ -526,7 +505,6 @@ class WaitableTimer(Thread):
             return False
     
     def Deactivate(self, DisableStateCheck = False):
-        
         self.__DebugPrint("Deactivate(): In function")
         
         if DisableStateCheck:
