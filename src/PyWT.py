@@ -350,7 +350,7 @@ class WaitableTimer(Thread):
         self.__State = TIMER_STATE_TERMINATED
         self.__DebugPrint("Current State: TIMER_STATE_TERMINATED")
     
-    ############ Decorator ##############
+    ############ Decorators ##############
     def Validate(Minimum, Maximum):
         ## Dynamically creating a decorator 
         def Decorator(Function):
@@ -361,6 +361,16 @@ class WaitableTimer(Thread):
                 Function(self, Value)
             return WrapFunction
         return Decorator
+    
+    def CheckTerminatedState(Function):
+        def WrapFunction(self):
+            if self.__State == TIMER_STATE_TERMINATED:
+                self.__DebugPrint("Timer is in TERMINATED state. All invocations are prohibited")
+                self.__Error = T_ERROR_INCORRECT_STATE
+                return False
+            else:
+                Function()
+        return WrapFunction
     
     ########### Validators ################
     @Validate(TIMER_INTERVAL_INITIAL_MIN, TIMER_INTERVAL_INITIAL_MAX)
@@ -442,6 +452,7 @@ class WaitableTimer(Thread):
             return False
     
     ########## Action functions ##############
+    @CheckTerminatedState
     def Activate(self, DisableStateCheck = False):
         self.__DebugPrint("Activate(): In function")
         
@@ -466,6 +477,7 @@ class WaitableTimer(Thread):
             self.__Error = T_ERROR_INCORRECT_STATE
             return False
     
+    @CheckTerminatedState
     def Pause(self, Wait=0, DisableStateCheck = False):
         self.__DebugPrint("Pause(): In function")
         
@@ -490,6 +502,7 @@ class WaitableTimer(Thread):
             self.__Error = T_ERROR_INCORRECT_STATE
             return False
     
+    @CheckTerminatedState
     def Resume(self, DisableStateCheck = False):
         self.__DebugPrint("Resume(): In function")
         
@@ -514,6 +527,7 @@ class WaitableTimer(Thread):
             self.__Error = T_ERROR_INCORRECT_STATE
             return False
     
+    @CheckTerminatedState
     def Deactivate(self, DisableStateCheck = False):
         self.__DebugPrint("Deactivate(): In function")
         
@@ -538,6 +552,7 @@ class WaitableTimer(Thread):
             self.__Error = T_ERROR_INCORRECT_STATE
             return False
     
+    @CheckTerminatedState
     def Terminate(self, DisableStateCheck = False):
         self.__DebugPrint("Terminate(): In function")
         
