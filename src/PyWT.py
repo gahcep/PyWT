@@ -116,9 +116,18 @@ class WaitableTimer(Thread):
         ## Debug related
         self.__DEBUG = DEBUG 
         self.__PROFILE = PROFILE
-        ## Flags        
-        self.__IsOneTimeShotTimer = True if self.__TimerInterval == 0 else False
-        self.__IsRepeatableTimer = True if self.__TimerCount != 0 else False
+        
+        ## Flags
+        if self.__TimerInterval == 0 or self.__TimerCount == 1:
+            self.__IsOneTimeShotTimer = True
+        else:
+            self.__IsOneTimeShotTimer = False
+        self.__IsRepeatableTimer = True if self.__TimerCount > 1 else False
+        
+        # Check flags validity
+        ## Both types simultaneously is not allowed
+        if self.__IsOneTimeShotTimer and self.__IsRepeatableTimer:
+            self.__IsRepeatableTimer = False
         
         # Inner variables
         self.__SuspendedDelay = 0
@@ -295,6 +304,8 @@ class WaitableTimer(Thread):
                     if self.__IsOneTimeShotTimer:
                         self.__DebugPrint("Terminating a One-Time-Shot timer")
                         self.__eTerminate.set()
+                    elif self.__IsRepeatableTimer:
+                        self.__TimerCount -= 1
                     continue
                 
             ## TIMER_STATE_RUNNING
