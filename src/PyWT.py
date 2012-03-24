@@ -345,7 +345,6 @@ class WaitableTimer(Thread):
                             self.__DebugPrint("Remained invocation function calls: " + repr(self.__TimerCount))
             
             if not self.__eTerminate.is_set():
-                self.__DebugPrint("Terminating a timer")
                 self.__eTerminate.wait(self.__Precision)
 
         self.__State = TIMER_STATE_TERMINATED
