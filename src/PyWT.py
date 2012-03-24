@@ -105,10 +105,10 @@ class WaitableTimer(Thread):
         Thread.__init__(self)
         
         # Received parameters 
-        self.ValidatePrecision(Precision)
-        self.ValidateInitialInterval(TimerInitialInterval)
-        self.ValidateInterval(TimerContinuousInterval)
-        self.ValidateCount(TimerCount)
+        self.SetPrecision(Precision)
+        self.SetInitialInterval(TimerInitialInterval)
+        self.SetInterval(TimerContinuousInterval)
+        self.SetCount(TimerCount)
         ## Function related
         self.__FunctionProc = FunctionProc
         self.__FunctionArgs = FunctionArgs
@@ -178,8 +178,8 @@ class WaitableTimer(Thread):
                 ## MESSAGE_CHANGE
                 elif message[0] == MESSAGE_CHANGE:
                     self.__DebugPrint(">> Received MESSAGE_CHANGE")
-                    self.ValidateInitialInterval(message[1])
-                    self.ValidateInterval(message[2])
+                    self.SetInitialInterval(message[1])
+                    self.SetInterval(message[2])
                     
                     if self.__State == TIMER_STATE_RUNNINGINITIAL:
                         TimeoutMark += self.__TimerInitialInterval - TimeoutMark
@@ -189,7 +189,7 @@ class WaitableTimer(Thread):
                 ## MESSAGE_PRECISION
                 elif message[0] == MESSAGE_PRECISION:
                     self.__DebugPrint(">> Received MESSAGE_PRECISION")
-                    self.ValidatePrecision(message[1])
+                    self.SetPrecision(message[1])
                 
                 ## MESSAGE_ACTIVATE
                 elif message[0] == MESSAGE_ACTIVATE:
@@ -205,7 +205,7 @@ class WaitableTimer(Thread):
                 elif message[0] == MESSAGE_PAUSE:
                     self.__DebugPrint(">> Received MESSAGE_PAUSE")
                     self.__ePauseResume.set()
-                    self.ValidateDelay(message[1])
+                    self.SetDelay(message[1])
                     
                 ## MESSAGE_RESUME
                 elif message[0] == MESSAGE_RESUME:
@@ -351,7 +351,7 @@ class WaitableTimer(Thread):
         self.__DebugPrint("Current State: TIMER_STATE_TERMINATED")
     
     ############ Decorators ##############
-    def Validate(Minimum, Maximum):
+    def Constraint(Minimum, Maximum):
         ## Dynamically creating a decorator 
         def Decorator(Function):
             ## Function to call
@@ -373,24 +373,24 @@ class WaitableTimer(Thread):
         return WrapFunction
     
     ########### Validators ################
-    @Validate(TIMER_INTERVAL_INITIAL_MIN, TIMER_INTERVAL_INITIAL_MAX)
-    def ValidateInitialInterval(self, Value):
+    @Constraint(TIMER_INTERVAL_INITIAL_MIN, TIMER_INTERVAL_INITIAL_MAX)
+    def SetInitialInterval(self, Value):
         self.__TimerInitialInterval = Value
     
-    @Validate(TIMER_INTERVAL_MIN, TIMER_INTERVAL_MAX)
-    def ValidateInterval(self, Value):
+    @Constraint(TIMER_INTERVAL_MIN, TIMER_INTERVAL_MAX)
+    def SetInterval(self, Value):
         self.__TimerInterval = Value
     
-    @Validate(PRECISION_MIN, PRECISION_MAX)
-    def ValidatePrecision(self, Value):
+    @Constraint(PRECISION_MIN, PRECISION_MAX)
+    def SetPrecision(self, Value):
         self.__Precision = Value
     
-    @Validate(TIMER_COUNT_MIN, TIMER_COUNT_MAX)
-    def ValidateCount(self, Value):
+    @Constraint(TIMER_COUNT_MIN, TIMER_COUNT_MAX)
+    def SetCount(self, Value):
         self.__TimerCount = Value
             
-    @Validate(SUSPENDED_DELAY_MIN, SUSPENDED_DELAY_MAX)
-    def ValidateDelay(self, Value):
+    @Constraint(SUSPENDED_DELAY_MIN, SUSPENDED_DELAY_MAX)
+    def SetDelay(self, Value):
         self.__SuspendedDelay = Value
         
     ########## Getter/Setter functions #########
@@ -425,29 +425,29 @@ class WaitableTimer(Thread):
             print Message
     
     ########## Behaviour functions ###########
-    def SetChange(self, Initial, Interval):
-        self.__DebugPrint("SetChange(): In function")
+    def ChangeIntervals(self, Initial, Interval):
+        self.__DebugPrint("ChangeIntervals(): In function")
         
         if self.__State != TIMER_STATE_TERMINATED:
             self.__MsgQueue.put_nowait((MESSAGE_CHANGE, Initial, Interval))
-            self.__DebugPrint("SetChange(): Notice: message is sent")
+            self.__DebugPrint("ChangeIntervals(): Notice: message is sent")
             self.__Error = T_SUCCESS
             return True
         else:
-            self.__DebugPrint("SetChange(): " + self.__OutputErrorState([TIMER_STATE_TERMINATED], Invert=True))
+            self.__DebugPrint("ChangeIntervals(): " + self.__OutputErrorState([TIMER_STATE_TERMINATED], Invert=True))
             self.__Error = T_ERROR_INCORRECT_STATE
             return False
     
-    def SetPrecision(self, Precision):
-        self.__DebugPrint("SetPrecision(): In function")
+    def ChangePrecision(self, Precision):
+        self.__DebugPrint("ChangePrecision(): In function")
         
         if self.__State != TIMER_STATE_TERMINATED:
             self.__MsgQueue.put_nowait((MESSAGE_PRECISION, Precision, 0))
-            self.__DebugPrint("SetPrecision(): Notice: message is sent")
+            self.__DebugPrint("ChangePrecision(): Notice: message is sent")
             self.__Error = T_SUCCESS
             return True
         else:
-            self.__DebugPrint("SetPrecision(): " + self.__OutputErrorState([TIMER_STATE_TERMINATED], Invert=True))
+            self.__DebugPrint("ChangePrecision(): " + self.__OutputErrorState([TIMER_STATE_TERMINATED], Invert=True))
             self.__Error = T_ERROR_INCORRECT_STATE
             return False
     
